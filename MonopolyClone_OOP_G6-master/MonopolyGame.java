@@ -12,7 +12,9 @@ public class MonopolyGame extends JFrame {
     private JButton btnBuy;
     private JButton btnPayRent;
     private JButton btnRoll;
-    private JButton btnNext;
+    private JButton btnSellProperty;
+    private JButton btnP1;
+    private JButton btnP2;
     private Dice dice;
 
     private Jail jail;
@@ -99,25 +101,65 @@ public class MonopolyGame extends JFrame {
             }
         });
 
-        btnNext.addActionListener(new ActionListener() {
+        btnP1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (gameIsRunning) {
+                    showPlayerProperties(player1);
+                }
+            }
+        });
+
+        btnP2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (gameIsRunning && !mediterraneanAve.isOwned()) {
                     switchToNextPlayer();
                 }
             }
         });
 
+
     }
+
+    private void showPlayerProperties(Player player) {
+        StringBuilder message = new StringBuilder();
+        message.append("Properties owned by ").append(player.getName()).append(":\n");
+
+        for (Property property : player.getOwnedProperties()) {
+            message.append(property.getName()).append("\n");
+        }
+
+        JOptionPane.showMessageDialog(this, message.toString(), "Player Properties", JOptionPane.INFORMATION_MESSAGE);
+    }
+
     private void switchToNextPlayer() {
         currentPlayerIndex = (currentPlayerIndex + 1) % 2;
         currentPlayer = (currentPlayerIndex == 0) ? player1 : player2;
-        updateDisplayText("Next turn: " + currentPlayer.getName());
+        displayText.setText("Next turn: " + currentPlayer.getName());
+    }
+
+    private void handleBuyButtonClick(Player currentPlayer, Property currentProperty) {
+        // Implement the logic for handling the buy button click
+        // For example:
+        // Call the onPurchase method to handle the purchase logic
+        // Add your specific logic for buying the property here
+        if (currentPlayer.canAfford(currentProperty.getPrice())) {
+            currentPlayer.pay(currentProperty.getPrice());
+            currentProperty.setOwner(currentPlayer);
+            displayProp.setText(currentPlayer.getName() + " bought " + currentProperty.getName() + " for $" + currentProperty.getPrice());
+            currentPlayer.pay(currentProperty.getPrice());
+            currentPlayer.addProperty(currentProperty);
+
+        } else {
+            displayProp.setText(currentPlayer.getName() + " cannot afford " + currentProperty.getName());
+            // Implement additional logic, e.g., bankrupt the player
+        }
     }
 
 
     private void handleDiceRoll(int diceRoll) {
-        currentPlayer = (currentPlayerIndex == 0) ? player1 : player2;
+        currentPlayer = player1;
         currentPlayer.move(diceRoll);
 
         if (currentPlayer.getPosition() % 40 == 1) {
@@ -133,9 +175,20 @@ public class MonopolyGame extends JFrame {
 //                    break;
             case 2: // Mediterranean Avenue
                 try {
-                    Handle.handleStreetProperty(currentPlayer, mediterraneanAve);
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, mediterraneanAve));
+
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !mediterraneanAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, mediterraneanAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
                 } catch (Exception e) {
-                    System.out.println("Exception occurred on Mediterranean Avenue: " + e.getMessage());
+                    displayProp.setText("Exception occurred on Mediterranean Avenue: " + e.getMessage());
                 }
                 break;
             case 3: // Community Chest
@@ -143,7 +196,22 @@ public class MonopolyGame extends JFrame {
                 communityChestCard.executeAction(currentPlayer);
                 break;
             case 4: // Baltic Avenue
-                Handle.handleStreetProperty(currentPlayer, balticAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, balticAve));
+
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !balticAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, balticAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Baltic Avenue: " + e.getMessage());
+                }
                 break;
             case 5: // Income Tax
                 IncomeTax incomeTax = new IncomeTax("Income Tax", 200);
@@ -153,100 +221,383 @@ public class MonopolyGame extends JFrame {
                 Handle.handleRailroadProperty(currentPlayer, "Reading Railroad", 200);
                 break;
             case 7: // Oriental Avenue
-                Handle.handleStreetProperty(currentPlayer, orientalAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, orientalAve));
+
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !orientalAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, orientalAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Oriental Avenue: " + e.getMessage());
+                }
                 break;
             case 8: // Chance
                 ChanceCard chanceCard = new ChanceCard("Chance Card Description"); // Add pata desc here
                 chanceCard.executeAction(currentPlayer);
                 break;
             case 9: // Vermont Avenue
-                Handle.handleStreetProperty(currentPlayer, vermontAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, vermontAve));
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !vermontAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, vermontAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Vermont Avenue: " + e.getMessage());
+                }
                 break;
             case 10: // Connecticut Avenue
-                Handle.handleStreetProperty(currentPlayer, connecticutAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, connecticutAve));
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !connecticutAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, connecticutAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Connecticut Avenue: " + e.getMessage());
+                }
                 break;
             case 11: // Just Visiting/In Jail
                 if (!jail.isPlayerInJail(currentPlayer)) {
-                    System.out.println(currentPlayer.getName() + " is just visiting Jail.");
+                    displayProp.setText(currentPlayer.getName() + " is just visiting Jail.");
                 } else {
-                    System.out.println(currentPlayer.getName() + " is in Jail. Pay $50 to get out or roll doubles on your next turn.");
+                    displayProp.setText(currentPlayer.getName() + " is in Jail. Pay $50 to get out or roll doubles on your next turn.");
                     // Implement additional logic for handling Jail, e.g., paying to get out or rolling doubles
                 }
                 break;
             case 12: // St. Charles Place
-                Handle.handleStreetProperty(currentPlayer, STcharlesPlace);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, STcharlesPlace));
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !STcharlesPlace.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, STcharlesPlace);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on St Charles Place: " + e.getMessage());
+                }
                 break;
             case 13: // Electric Company
-                Handle.handleUtilityProperty(currentPlayer, "Electric Company", 150);
+                try {
+                    displayProp.setText(Handle.handleUtilityProperty(currentPlayer, "Electric Company", 150));
+
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            displayProp.setText(Handle.BuyUtility("yes", currentPlayer, "Electric Company", 150));
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Mediterranean Avenue: " + e.getMessage());
+                }
                 break;
             case 14: // States Avenue
-                Handle.handleStreetProperty(currentPlayer, statesAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, statesAve));
+
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !statesAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, statesAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on StatesAve Avenue: " + e.getMessage());
+                }
                 break;
             case 15: // Virginia Avenue
-                Handle.handleStreetProperty(currentPlayer, virginiaAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, virginiaAve));
+
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !virginiaAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, virginiaAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Virginia Avenue: " + e.getMessage());
+                }
                 break;
             case 16: // Pennsylvania Railroad
                 Handle.handleRailroadProperty(currentPlayer, "Pennsylvania Railroad", 200);
                 break;
             case 17: // St. James Place
-                Handle.handleStreetProperty(currentPlayer, STjamesPlace);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, STjamesPlace));
+
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !STjamesPlace.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, STjamesPlace);
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on St. James Place: " + e.getMessage());
+                }
                 break;
             case 18: // Community Chest
                 CommunityChestCard communityChestCard2 = new CommunityChestCard("Community Chest Card Description"); // Add pata desc here
                 communityChestCard2.executeAction(currentPlayer);
                 break;
             case 19: // Tennessee Avenue
-                Handle.handleStreetProperty(currentPlayer, tennesseeAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, tennesseeAve));
+
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !tennesseeAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, tennesseeAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Tennessee Avenue: " + e.getMessage());
+                }
                 break;
             case 20: // New York Avenue
-                Handle.handleStreetProperty(currentPlayer, newyorkAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, newyorkAve));
+                    switchToNextPlayer();
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !newyorkAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, newyorkAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on New York Avenue : " + e.getMessage());
+                }
                 break;
             case 21: // Free Parking
                 freeParking.handleFreeParking(currentPlayer);
                 break;
             case 22: // Kentucky Avenue
-                Handle.handleStreetProperty(currentPlayer, kentuckyAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, kentuckyAve));
+
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !kentuckyAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, kentuckyAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Kentucky Avenue : " + e.getMessage());
+                }
                 break;
             case 23: // Chance
                 ChanceCard chanceCard2 = new ChanceCard("Chance Card Description"); // Add pata desc here
                 chanceCard2.executeAction(currentPlayer);
                 break;
             case 24: // Indiana Avenue
-                Handle.handleStreetProperty(currentPlayer, indianaAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, indianaAve));
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !indianaAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, indianaAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Indiana Avenue : " + e.getMessage());
+                }
                 break;
             case 25: // Illinois Avenue
-                Handle.handleStreetProperty(currentPlayer, illinoisAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, illinoisAve));
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !illinoisAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, illinoisAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Illinois Avenue : " + e.getMessage());
+                }
                 break;
             case 26: // B. & O. Railroad
                 Handle.handleRailroadProperty(currentPlayer, "B. & O. Railroad", 200);
                 break;
             case 27: // Atlantic Avenue
-                Handle.handleStreetProperty(currentPlayer, atlanticAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, atlanticAve));
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !atlanticAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, atlanticAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Atlantic Avenue : " + e.getMessage());
+                }
                 break;
             case 28: // Ventnor Avenue
-                Handle.handleStreetProperty(currentPlayer, ventnorAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, ventnorAve));
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !ventnorAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, ventnorAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Ventnor Avenue : " + e.getMessage());
+                }
                 break;
             case 29: // Water Works
-                Handle.handleUtilityProperty(currentPlayer, "Water Works", 150);
+                try {
+                    displayProp.setText(Handle.handleUtilityProperty(currentPlayer, "Water Works", 200));
+
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            displayProp.setText(Handle.BuyUtility("yes", currentPlayer, "Water Works", 200));
+                            switchToNextPlayer();
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Water Works: " + e.getMessage());
+                }
                 break;
             case 30: // Marvin Gardens
-                Handle.handleStreetProperty(currentPlayer, marvinGardens);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, marvinGardens));
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !marvinGardens.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, marvinGardens);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Marvin Gardens: " + e.getMessage());
+                }
                 break;
             case 31: // Go to Jail
                 jail.sendToJail(currentPlayer);
                 break;
             case 32: // Pacific Avenue
-                Handle.handleStreetProperty(currentPlayer, pacificAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, pacificAve));
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !pacificAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, pacificAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Pacific Avenue : " + e.getMessage());
+                }
                 break;
             case 33: // North Carolina Avenue
-                Handle.handleStreetProperty(currentPlayer, northcarolinaAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, northcarolinaAve));
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !northcarolinaAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, northcarolinaAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on North Carolina Avenue : " + e.getMessage());
+                }
                 break;
             case 34: // Community Chest
                 CommunityChestCard communityChestCard3 = new CommunityChestCard("Community Chest Card Description"); // Add pata desc here
                 communityChestCard3.executeAction(currentPlayer);
                 break;
             case 35: // Pennsylvania Avenue
-                Handle.handleStreetProperty(currentPlayer, pennsylvaniaAve);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, pennsylvaniaAve));
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !pennsylvaniaAve.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, pennsylvaniaAve);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Indiana Avenue : " + e.getMessage());
+                }
                 break;
             case 36: // Short Line
                 Handle.handleRailroadProperty(currentPlayer, "Short Line", 200);
@@ -256,14 +607,42 @@ public class MonopolyGame extends JFrame {
                 chanceCard3.executeAction(currentPlayer);
                 break;
             case 38: // Park Place
-                Handle.handleStreetProperty(currentPlayer, parkPlace);
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, parkPlace));
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !parkPlace.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, parkPlace);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on Park Avenue : " + e.getMessage());
+                }
                 break;
             case 39: // Luxury Tax
                 ChanceCard.LuxuryTax luxuryTax = new ChanceCard.LuxuryTax("Luxury Tax", 100);
                 luxuryTax.collectLuxuryTax(currentPlayer);
                 break;
-            case 0: // Boardwalk //
-                Handle.handleStreetProperty(currentPlayer, boardWalk);
+            case 40: // Boardwalk //
+                try {
+                    displayProp.setText(Handle.handleStreetProperty(currentPlayer, boardWalk));
+                    btnBuy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (gameIsRunning && !boardWalk.isOwned()) {
+                                handleBuyButtonClick(currentPlayer, boardWalk);
+                                switchToNextPlayer();
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    System.out.println("Exception occurred on BoardWalk Avenue : " + e.getMessage());
+                }
                 break;
             // CASE 40 IS UNREACHABLE == ILISAN UG "case 0:" NEED FIX!
 //                currentPlayer.getPosition() % 40 range from 0 to 39, not including 40. Therefore,
@@ -286,12 +665,7 @@ public class MonopolyGame extends JFrame {
         if (!gameIsRunning) {
             // Display a dialog to end the game
             JOptionPane.showMessageDialog(this, "Game over!");
-        } else {
-            switchToNextPlayer();
         }
-
-
-
     }
 
 
